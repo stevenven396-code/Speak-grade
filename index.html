@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IELTS Speaking Auto-Grader</title>
+<style>
+:root{--bg:#f4f3ff;--card:#fff;--ink:#1d1f3d;--muted:#5d6085;--line:#dedcf3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14152b;--card:#1f2040;--ink:#eeeefb;--muted:#a9abd0;--line:#3a3c66}}
+:root[data-theme="dark"]{--bg:#14152b;--card:#1f2040;--ink:#eeeefb;--muted:#a9abd0;--line:#3a3c66}
+html{scroll-padding-top:env(safe-area-inset-top,0px);color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.45;font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #e03a8c;outline-offset:2px}
+header{background:linear-gradient(115deg,#3b2fc9,#7a4ff0 45%,#e03a8c 80%,#f2a516);color:#fff;padding:20px 16px}
+header div,main{max-width:860px;margin:0 auto}
+h1{margin:0;font-size:clamp(1.4rem,4.5vw,2rem);line-height:1.15}
+header p{margin:6px 0 0}
+main{padding:16px 12px 50px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+label{display:block;font-weight:700;margin:10px 0 4px}
+textarea,input,select{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}
+textarea{min-height:230px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.btn{border:none;border-radius:14px;padding:14px 24px;font-weight:800;font-size:1.05rem;cursor:pointer;color:#fff;background:linear-gradient(110deg,#3b2fc9,#e03a8c)}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.btn:disabled{opacity:.55;cursor:wait}
+.hint{font-size:.88rem;color:var(--muted)}
+.err{background:#fde0e0;color:#7a1010;border-radius:12px;padding:10px 14px;margin-top:12px;font-weight:600}
+.hero{border-radius:24px;padding:20px;color:#fff;background:linear-gradient(120deg,#3b2fc9,#7a4ff0 50%,#e03a8c);display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.band{width:124px;height:124px;border-radius:50%;background:#fff;color:#3b2fc9;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;flex:none}
+.band b{font-size:2.7rem;line-height:1}.band small{font-size:.68rem;color:#5d6085}
+.hero h2{margin:0 0 4px}.hero p{margin:4px 0}
+.sec{--soft:color-mix(in srgb,var(--c) 14%,var(--card));border:2px solid var(--soft);border-left:8px solid var(--c);border-radius:16px;background:var(--card);margin:12px 0;padding:0}
+.sec summary{cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:1fr 70px;gap:4px 10px;align-items:center;list-style:none}
+.sec summary::-webkit-details-marker{display:none}
+.sec .t{font-weight:800}
+.sec .v{text-align:right;font-weight:800;color:var(--c)}
+.track{grid-column:1/-1;height:14px;border-radius:99px;background:var(--soft);overflow:hidden}
+.track i{display:block;height:100%;background:var(--c);border-radius:99px}
+.sec .body{padding:0 14px 14px}
+.ev{background:var(--soft);border-radius:12px;padding:10px 12px;margin:6px 0 10px;font-size:.93rem}
+.it{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:.93rem}
+.dots{display:flex;gap:3px;flex:none}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--c)}
+.dots i.on{background:var(--c)}
+.na{color:var(--muted);font-style:italic;flex:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.good{border-color:#0f9a76}.work{border-color:#e9482f}
+.card h3{margin:0 0 6px}ul{margin:6px 0;padding-left:20px}li{margin:5px 0}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;border-radius:99px;padding:1px 9px;color:#fff;margin-right:6px}
+.erow{border-top:1px solid var(--line);padding:8px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.load{text-align:center;padding:30px 10px;font-weight:700}
+.sp{display:inline-block;width:22px;height:22px;border:4px solid var(--line);border-top-color:#7a4ff0;border-radius:50%;animation:s 1s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1d1f3d;color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}.hero,.track i,.tag,.band{-webkit-print-color-adjust:exact;print-color-adjust:exact}.sec{break-inside:avoid}}
+@media (prefers-reduced-motion:reduce){.sp{animation:none}}
+</style>
+</head>
+<body>
+<header><div><h1>IELTS Speaking Auto-Grader</h1><p>Paste your speech transcript and get it graded on every subskill of the checklist.</p></div></header>
+<main>
+<section class="card noprint" id="settings">
+  <div class="grid" style="align-items:end">
+    <div><h3 style="margin:0 0 4px">Claude API settings</h3><p class="hint" style="margin:0">Your API key is encrypted and stored on this Windows computer. API usage may incur charges from Anthropic.</p></div>
+    <div><label for="apiKey">Anthropic API key</label><input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-…"></div>
+  </div>
+  <div class="row"><button class="btn" id="saveKey">Save API key</button><button class="btn ghost" id="removeKey">Remove saved key</button><span class="hint" id="keyStatus" aria-live="polite"></span></div>
+</section>
+<section class="card noprint" id="inp">
+  <div class="grid">
+    <div><label for="nm">Student name</label><input id="nm" type="text" placeholder="Your name"></div>
+    <div><label for="pt">Part</label><select id="pt"><option>Part 1</option><option>Part 2</option><option>Part 3</option><option>Full Test</option></select></div>
+  </div>
+  <label for="q">Question or cue card (optional)</label>
+  <input id="q" type="text" placeholder="e.g. Describe a place you like to visit">
+  <label for="sp">Your speech transcript</label>
+  <textarea id="sp" maxlength="12000" placeholder="Paste what you said here. Writing “um” and “...” where you paused helps the fluency grade."></textarea>
+  <p class="hint">A transcript can’t show how words sound, so pronunciation is only graded when the text gives clear clues. Bands are a practice guide, not an official IELTS score.</p>
+  <div class="row"><button class="btn" id="go">Grade my speech</button></div>
+  <div id="msg"></div>
+</section>
+<div id="out"></div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const S=[
+{id:'fluency',t:'Fluency & Coherence',i:'🌊',c:'#e9482f',a:['Begins answering without excessive hesitation','Maintains a reasonably consistent speaking pace','Speaks in meaningful groups of words rather than isolated words','Maintains speech without frequent, disruptive pauses','Uses appropriate fillers without overusing them','Uses repetition appropriately rather than repeating ideas unnecessarily','Self-corrects without repeatedly interrupting the message','Extends answers beyond simple statements when appropriate','Organizes information in a logical sequence','Uses linking expressions appropriately','Makes relationships between ideas clear','Maintains coherence in longer answers','Avoids unnecessary digressions','Concludes an answer appropriately when needed'],
+ p:'Record a 1-minute answer, then repeat it in 45 seconds without stopping. Mark each pause and add a linking word there.'},
+{id:'lexical',t:'Lexical Resource',i:'📚',c:'#c98600',a:['Uses vocabulary relevant to the question','Expresses basic ideas without excessive reliance on vague words','Uses a range of topic-specific vocabulary','Selects words precisely to convey intended meanings','Uses synonyms and paraphrasing to avoid unnecessary repetition','Uses collocations naturally','Uses common expressions and idiomatic language appropriately','Demonstrates flexibility when discussing familiar topics','Uses vocabulary suitable for abstract topics','Paraphrases when a specific word is unavailable','Uses word forms appropriately','Avoids inappropriate word combinations','Avoids unnecessary repetition of memorized expressions','Can explain an idea using alternative wording'],
+ p:'Pick one topic, write 5 collocations for it, say three sentences with each, then answer the same question using different wording.'},
+{id:'grammar',t:'Grammatical Range & Accuracy',i:'🧩',c:'#0f9a76',a:['Produces accurate simple sentences','Uses complex sentences appropriately','Uses a range of sentence structures','Uses verb tenses appropriately','Maintains appropriate subject–verb agreement','Uses articles and determiners accurately','Uses prepositions accurately','Uses countable and uncountable nouns correctly','Uses conditionals where appropriate','Uses relative clauses appropriately','Uses a range of conjunctions to connect clauses','Uses modal verbs to express possibility, obligation, or speculation','Uses passive structures when appropriate','Uses question forms and indirect questions appropriately','Avoids persistent grammatical errors that obscure meaning','Maintains grammatical control in longer answers'],
+ p:'Record a 2-minute answer, write it out, circle your errors, then rewrite it with at least two complex sentences.'},
+{id:'pron',t:'Pronunciation',i:'🎧',c:'#1f86d9',a:['Produces speech that is generally intelligible','Pronounces individual sounds clearly enough to convey meaning','Distinguishes relevant vowel sounds','Distinguishes relevant consonant sounds','Places stress appropriately within words','Uses sentence stress to highlight important information','Uses intonation appropriately to convey meaning and attitude','Groups words into meaningful thought groups','Uses connected speech naturally enough to support communication','Maintains an appropriate rhythm','Uses pauses to support meaning rather than interrupting it','Maintains intelligibility when speaking at length'],
+ p:'Shadow a 30-second clip of a clear speaker, mark word stress and thought groups, record yourself and compare.'},
+{id:'ideas',t:'Idea Development & Reasoning',i:'💡',c:'#7a4ff0',a:['Answers the question directly','Identifies the main point they want to communicate','Provides relevant reasons for opinions','Explains why those reasons matter','Supports claims with relevant examples','Adds details that make an explanation clearer','Distinguishes between opinions and facts','Compares alternatives meaningfully','Explains causes and consequences','Discusses advantages and disadvantages','Acknowledges exceptions or alternative viewpoints when relevant','Draws reasonable conclusions from explanations','Avoids unsupported generalizations','Maintains relevance throughout the answer'],
+ p:'Answer five Part 3 questions with this pattern: answer, reason, example, then link back to the question.'},
+{id:'interaction',t:'Communicative Competence & Interaction',i:'💬',c:'#e03a8c',a:['Understands the main focus of the question','Responds relevantly to the question asked','Interprets abstract questions appropriately','Responds to unexpected questions without excessive difficulty','Expresses agreement or disagreement clearly','Expresses uncertainty or qualification appropriately','Clarifies meaning when necessary','Develops answers independently without excessive examiner support','Adjusts explanations when a question requires a different perspective','Maintains a natural, conversational manner'],
+ p:'Work with a partner who asks surprise follow-up questions. Practise phrases for clarifying, disagreeing politely and expressing uncertainty.'}];
+const CORE=['fluency','lexical','grammar','pron'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band=a=>Math.round((4+(a-1)*1.125)*2)/2;
+const lvl=a=>a<2?'Just starting':a<3?'Developing':a<4?'Getting solid':a<4.5?'Strong':'Excellent';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+let R=null,meta={};
+
+function prompt(sp,part,q){
+  const list=S.map(s=>`${s.id}:\n`+s.a.map((x,i)=>`${i+1}. ${x}`).join('\n')).join('\n\n');
+  return `You are an experienced IELTS Speaking examiner. Below is a TRANSCRIPT of a student's spoken answer (${part}${q?'; question: '+q:''}). Grade it against this subskills checklist.
+
+Rate each subskill from 1 to 5 (1 = needs lots of work, 2 = developing, 3 = adequate, 4 = good, 5 = very strong). Judge only from evidence in the transcript. Use null when a subskill cannot be judged from text (for example vowel or consonant sounds, intonation, or pauses that are not marked in the transcript). Be fair and calibrated for B1–B2 learners and do not inflate. If the transcript is very short, use null for skills that need longer speech.
+
+CHECKLIST:
+${list}
+
+Return ONLY valid JSON, with no markdown fences, in exactly this shape:
+{"ratings":{"fluency":[...${S[0].a.length} values],"lexical":[...${S[1].a.length}],"grammar":[...${S[2].a.length}],"pron":[...${S[3].a.length}],"ideas":[...${S[4].a.length}],"interaction":[...${S[5].a.length}]},
+"evidence":{"fluency":"1-2 sentences naming a strength and a weakness, quoting short phrases from the transcript","lexical":"...","grammar":"...","pron":"...","ideas":"...","interaction":"..."},
+"errors":[{"said":"exact words from the transcript","issue":"what is wrong or limited","better":"improved version","priority":"High"}],
+"strongest":"the student's strongest subskills in one sentence","frequent_error":"the most frequent recurring error","practice":"one recommended practice activity","next_focus":"suggested focus for the next assessment","comments":"2-3 encouraging, specific sentences addressed to the student"}
+Give 4 to 6 items in "errors", each a real example from the transcript with priority High, Medium or Low. Write all text in simple English for a B1–B2 learner.
+
+TRANSCRIPT:
+"""
+${sp}
+"""`;
+}
+
+function clean(raw){
+  const r={ratings:{}};
+  S.forEach(s=>{
+    const a=(raw.ratings&&raw.ratings[s.id])||[];
+    r.ratings[s.id]=s.a.map((_,i)=>{const v=Number(a[i]);return v>=1&&v<=5?Math.round(v):null});
+  });
+  r.evidence=raw.evidence||{};
+  r.errors=Array.isArray(raw.errors)?raw.errors.filter(e=>e&&(e.said||e.issue)).slice(0,8):[];
+  ['strongest','frequent_error','practice','next_focus','comments'].forEach(k=>r[k]=raw[k]||'');
+  return r;
+}
+function stats(s){const v=R.ratings[s.id].filter(x=>x);return{avg:v.length?v.reduce((a,b)=>a+b,0)/v.length:null,n:v.length}}
+
+function render(){
+  const st=S.map(s=>({s,...stats(s)}));
+  const core=st.filter(x=>CORE.includes(x.s.id)&&x.avg!=null);
+  const b=core.length?Math.round(core.reduce((a,x)=>a+band(x.avg),0)/core.length*2)/2:null;
+  const rated=st.filter(x=>x.avg!=null);
+  const hi=[...rated].sort((a,b)=>b.avg-a.avg)[0], lo=[...rated].sort((a,b)=>a.avg-b.avg)[0];
+  const items=[];S.forEach(s=>s.a.forEach((t,i)=>{const v=R.ratings[s.id][i];if(v)items.push({s,t,v})}));
+  const strong=[...items].sort((a,b)=>b.v-a.v).filter(x=>x.v>=4).slice(0,3);
+  const weak=[...items].sort((a,b)=>a.v-b.v).filter(x=>x.v<=3).slice(0,3);
+  const pc={High:'#e9482f',Medium:'#c98600',Low:'#0f9a76'};
+  $('#out').innerHTML=`
+  <div class="hero">${b!=null?`<div class="band"><small>Indicative band</small><b>${b.toFixed(1)}</b></div>`:''}
+   <div><h2>${meta.name?esc(meta.name)+', here are your results':'Here are your results'}</h2>
+   <p>${esc(meta.part)} • ${meta.words} words</p>
+   ${hi?`<p>Strongest area: <b>${esc(hi.s.t)}</b> (${hi.avg.toFixed(1)} / 5)</p>`:''}
+   ${lo&&rated.length>1?`<p>Focus next on: <b>${esc(lo.s.t)}</b> (${lo.avg.toFixed(1)} / 5)</p>`:''}
+   <p style="font-size:.8rem;opacity:.92">Graded by AI from your transcript. The band is a practice guide based on fluency, vocabulary, grammar and pronunciation, not an official IELTS score.</p></div></div>
+  ${st.map(x=>{const s=x.s,p=x.avg?Math.round(x.avg/5*100):0;return `<details class="sec" style="--c:${s.c}"><summary>
+    <span class="t">${s.i} ${esc(s.t)}</span><span class="v">${x.avg?x.avg.toFixed(1)+' / 5':'—'}</span>
+    <span class="track"><i style="width:${p}%"></i></span>
+    <span class="hint" style="grid-column:1/-1">${x.avg?lvl(x.avg)+(CORE.includes(s.id)?' • about Band '+band(x.avg).toFixed(1):'')+' • '+x.n+'/'+s.a.length+' judged • tap for details':'Not enough evidence in the transcript'}</span></summary>
+    <div class="body">${R.evidence[s.id]?`<div class="ev">${esc(R.evidence[s.id])}</div>`:''}
+    ${s.a.map((t,i)=>{const v=R.ratings[s.id][i];return `<div class="it"><span>${i+1}. ${esc(t)}</span>${v?`<span class="dots" aria-label="${v} out of 5">${[1,2,3,4,5].map(n=>`<i class="${n<=v?'on':''}"></i>`).join('')}</span>`:'<span class="na">can’t judge</span>'}</div>`}).join('')}</div></details>`}).join('')}
+  <div class="two">
+   <div class="card good"><h3>🌟 Strongest subskills</h3>${strong.length?`<ul>${strong.map(x=>`<li><span class="tag" style="background:${x.s.c}">${x.v}</span>${esc(x.t)}</li>`).join('')}</ul>`:'<p>No skill reached 4 or 5 yet. Keep practising!</p>'}</div>
+   <div class="card work"><h3>🎯 Priority areas</h3>${weak.length?`<ul>${weak.map(x=>`<li><span class="tag" style="background:${x.s.c}">${x.v}</span>${esc(x.t)}</li>`).join('')}</ul>`:'<p>Nothing rated 3 or below. Great work!</p>'}</div>
+  </div>
+  ${R.errors.length?`<div class="card"><h3>🔍 Error log</h3>${R.errors.map(e=>`<div class="erow">${e.priority&&pc[e.priority]?`<span class="tag" style="background:${pc[e.priority]}">${esc(e.priority)}</span>`:''}
+   <div><b>You said:</b> ${esc(e.said)}</div><div><b>Issue:</b> ${esc(e.issue)}</div><div><b>Better:</b> ${esc(e.better)}</div></div>`).join('')}</div>`:''}
+  <div class="card"><h3>🏁 Your plan</h3>
+   ${[['Most frequent recurring error',R.frequent_error],['Recommended practice activity',R.practice||(lo&&lo.s.p)],['Suggested focus for the next assessment',R.next_focus||(lo&&lo.s.t)],['Comments',R.comments]].filter(x=>x[1]).map(x=>`<p><b>${x[0]}</b><br>${esc(x[1])}</p>`).join('')}</div>
+  <div class="row noprint"><button class="btn" id="pr">🖨 Print or save as PDF</button><button class="btn ghost" id="cp">Copy results as text</button><button class="btn ghost" id="nw">Grade another speech</button></div>`;
+  $('#pr').onclick=()=>window.print();
+  $('#nw').onclick=()=>{$('#out').innerHTML='';$('#sp').value='';window.scrollTo({top:0,behavior:'smooth'})};
+  $('#cp').onclick=()=>{
+    const L=['IELTS SPEAKING AUTO-GRADER RESULTS',`Student: ${meta.name||'-'} | ${meta.part}`,b!=null?`Indicative band (AI guide, not official): ${b.toFixed(1)}`:'',''];
+    st.forEach(x=>L.push(`${x.s.t}: ${x.avg?x.avg.toFixed(1)+' / 5':'not judged'}`));
+    L.push('','STRONGEST');strong.forEach(x=>L.push(`- ${x.t}`));L.push('PRIORITIES');weak.forEach(x=>L.push(`- ${x.t}`));
+    L.push('','ERRORS');R.errors.forEach(e=>L.push(`- [${e.priority||''}] "${e.said}" → ${e.better} (${e.issue})`));
+    L.push('',`Practice: ${R.practice}`,`Next focus: ${R.next_focus}`,`Comments: ${R.comments}`);
+    const t=L.join('\n');
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Results copied')).catch(()=>toast('Copy not available here'));
+  };
+  $('#out').scrollIntoView({behavior:'smooth'});
+}
+
+async function grade(){
+  const sp=$('#sp').value.trim(), words=sp.split(/\s+/).filter(Boolean).length;
+  const msg=$('#msg');msg.innerHTML='';
+  if(words<30){msg.innerHTML='<div class="err">Paste a longer transcript (at least 30 words) so there is enough to grade.</div>';return}
+  const status=await window.ieltsApp.keyStatus();
+  if(!status.configured){msg.innerHTML='<div class="err">Add your Anthropic API key in the settings section above before grading.</div>';return}
+  meta={name:$('#nm').value.trim(),part:$('#pt').value,words};
+  const btn=$('#go');btn.disabled=true;
+  $('#out').innerHTML='<div class="card load"><span class="sp"></span>Claude is reading your speech and grading each subskill…</div>';
+  try{
+    const raw=await window.ieltsApp.grade(prompt(sp,meta.part,$('#q').value.trim()));
+    R=clean(raw);render();
+  }catch(e){
+    $('#out').innerHTML='';
+    msg.innerHTML='<div class="err">'+esc(e?.message||'Something went wrong while grading. Check your connection and API key, then try again.')+'</div>';
+  }finally{btn.disabled=false}
+}
+$('#go').onclick=grade;
+$('#saveKey').onclick=async()=>{
+  const key=$('#apiKey').value.trim();
+  if(!key){$('#keyStatus').textContent='Enter your API key first.';return}
+  try{await window.ieltsApp.saveKey(key);$('#apiKey').value='';$('#keyStatus').textContent='API key saved securely.';refreshKeyStatus();}
+  catch(e){$('#keyStatus').textContent=e.message||'Could not save the key.'}
+};
+$('#removeKey').onclick=async()=>{await window.ieltsApp.deleteKey();$('#keyStatus').textContent='Saved API key removed.';refreshKeyStatus();};
+async function refreshKeyStatus(){
+  try{const s=await window.ieltsApp.keyStatus();$('#keyStatus').textContent=s.configured?'API key is configured.':'No API key saved yet.';}
+  catch{$('#keyStatus').textContent='Could not check API-key status.'}
+}
+refreshKeyStatus();
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "ielts-speaking-auto-grader",
+  "version": "1.0.0",
+  "description": "Standalone IELTS Speaking Auto-Grader powered by Claude API",
+  "main": "main.js",
+  "author": "IELTS Speaking Auto-Grader",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^39.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.ielts.speakingautograder",
+    "productName": "IELTS Speaking Auto-Grader",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "index.html", "package.json"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
